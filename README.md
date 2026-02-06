@@ -65,36 +65,25 @@ flutter pub get
 
 ### 3. Configure Gemini API
 
-1. Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Open `lib/main.dart` and replace:
-   ```dart
-   await initializeDependencies(geminiApiKey: 'YOUR_GEMINI_API_KEY');
+1. Get your API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Pass it at run time (do **not** commit the key):
+   ```bash
+   flutter run --dart-define=GEMINI_API_KEY=your_key_here
    ```
+   Or set it in your IDE run configuration (e.g. VS Code/Cursor: add `--dart-define=GEMINI_API_KEY=your_key_here` to the run args).
 
 ### 4. iOS Setup
 
-Add camera and photo library permissions to `ios/Runner/Info.plist`:
-
-```xml
-<key>NSCameraUsageDescription</key>
-<string>We need camera access to scan your medical reports</string>
-<key>NSPhotoLibraryUsageDescription</key>
-<string>We need photo library access to upload your medical reports</string>
-```
+Camera and photo library permissions are in `ios/Runner/Info.plist` (camera, photo library read/add). No extra steps if you used the project as-is.
 
 ### 5. Android Setup
 
-Add camera permissions to `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<uses-permission android:name="android.permission.CAMERA"/>
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-```
+Camera and storage permissions are in `android/app/src/main/AndroidManifest.xml` (camera, read/write external storage, read media images/video). No extra steps if you used the project as-is.
 
 ### 6. Run the App
 
 ```bash
-flutter run
+flutter run --dart-define=GEMINI_API_KEY=your_key_here
 ```
 
 ## Key Dependencies
@@ -113,6 +102,10 @@ flutter run
 ## Disclaimer
 
 This app is designed to help patients understand their health reports. It is **not intended to diagnose, treat, or replace professional medical advice**. Always consult a qualified healthcare provider for medical decisions.
+
+## Security (public repos)
+
+Do **not** commit Firebase config files or API keys. See [SECURITY.md](SECURITY.md) for what to keep local and what to do if you already pushed secrets.
 
 ## License
 

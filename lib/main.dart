@@ -21,9 +21,13 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
 
-  // Initialize dependencies
-  // TODO: Replace with your actual Gemini API key
-  await initializeDependencies(geminiApiKey: 'YOUR_GEMINI_API_KEY');
+  // Gemini API key: pass at run time to avoid committing secrets.
+  // Run: flutter run --dart-define=GEMINI_API_KEY=your_key_here
+  const geminiApiKey = String.fromEnvironment(
+    'GEMINI_API_KEY',
+    defaultValue: 'YOUR_GEMINI_API_KEY',
+  );
+  await initializeDependencies(geminiApiKey: geminiApiKey);
 
   runApp(const MyHealthBriefApp());
 }
