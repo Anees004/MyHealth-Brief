@@ -55,9 +55,9 @@ flutter pub get
 
 1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com)
 2. Add iOS and Android apps to your Firebase project
-3. Download configuration files:
-   - **iOS**: `GoogleService-Info.plist` → place in `ios/Runner/`
-   - **Android**: `google-services.json` → place in `android/app/`
+3. Get your config files (they are **not** in the repo for security):
+   - Run **`flutterfire configure`** in the project root (recommended), or
+   - Download from Firebase Console: **iOS** `GoogleService-Info.plist` → `ios/Runner/`; **Android** `google-services.json` → `android/app/`
 4. Enable the following Firebase services:
    - **Authentication**: Enable Email/Password and Google sign-in
    - **Firestore Database**: Create database in production mode  
