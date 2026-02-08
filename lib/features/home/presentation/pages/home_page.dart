@@ -299,7 +299,7 @@ class _HomePageState extends State<HomePage> {
       ),
       child: Column(
         children: [
-          FaIcon(
+          Icon(
             FontAwesomeIcons.fileLines,
             size: 48,
             color: AppColors.textSecondary.withValues(alpha: 0.5),

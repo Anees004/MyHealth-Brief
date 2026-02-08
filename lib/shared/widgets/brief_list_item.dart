@@ -40,7 +40,7 @@ class BriefListItem extends StatelessWidget {
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: FaIcon(
+                child: Icon(
                   FontAwesomeIcons.fileLines,
                   color: AppColors.textSecondary,
                   size: 24,

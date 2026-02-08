@@ -61,4 +61,9 @@ class AppStrings {
   static const String privacyPolicy = 'Privacy Policy';
   static const String termsOfService = 'Terms of Service';
   static const String helpSupport = 'Help & Support';
+  static const String deleteAccount = 'Delete account';
+  static const String deleteAccountConfirmTitle = 'Delete account?';
+  static const String deleteAccountConfirmMessage =
+      'This will permanently delete your account and all your data (health briefs, profile). You cannot undo this.';
+  static const String deleteAccountConfirmButton = 'Delete my account';
 }

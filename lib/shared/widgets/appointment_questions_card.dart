@@ -58,7 +58,7 @@ class AppointmentQuestionsCard extends StatelessWidget {
                   color: AppColors.primaryTeal,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const FaIcon(
+                child: const Icon(
                   FontAwesomeIcons.user,
                   color: AppColors.white,
                   size: 20,

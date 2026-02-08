@@ -35,6 +35,9 @@ abstract class AuthRemoteDataSource {
 
   /// Send password reset email
   Future<void> sendPasswordResetEmail(String email);
+
+  /// Delete account and all user data (Firestore user doc + health briefs, then Firebase Auth user)
+  Future<void> deleteAccount();
 }
 
 /// Auth remote data source implementation
@@ -200,6 +203,46 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await firebaseAuth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
       throw AuthException(message: e.message ?? 'Failed to send reset email', code: e.code);
+    }
+  }
+
+  static const int _batchSize = 500;
+
+  @override
+  Future<void> deleteAccount() async {
+    final user = firebaseAuth.currentUser;
+    if (user == null) {
+      throw const AuthException(message: 'No user signed in', code: 'no-user');
+    }
+    final uid = user.uid;
+
+    try {
+      // 1. Delete all health briefs for this user (batched)
+      final briefsRef = firestore.collection(AppConstants.healthBriefsCollection);
+      Query<Map<String, dynamic>> query = briefsRef.where('userId', isEqualTo: uid);
+      while (true) {
+        final snapshot = await query.limit(_batchSize).get();
+        if (snapshot.docs.isEmpty) break;
+        final batch = firestore.batch();
+        for (final doc in snapshot.docs) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+        if (snapshot.docs.length < _batchSize) break;
+      }
+
+      // 2. Delete user document
+      await firestore.collection(AppConstants.usersCollection).doc(uid).delete();
+
+      // 3. Delete Firebase Auth user (may throw requires-recent-login)
+      await user.delete();
+
+      // 4. Sign out (e.g. clear Google Sign-In)
+      await signOut();
+    } on FirebaseAuthException catch (e) {
+      throw AuthException(message: e.message ?? 'Failed to delete account', code: e.code);
+    } on FirebaseException catch (e) {
+      throw AuthException(message: e.message ?? 'Failed to delete your data', code: e.code);
     }
   }
 }

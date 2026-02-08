@@ -17,6 +17,7 @@ import '../../features/health_brief/data/repositories/health_brief_repository_im
 import '../../features/health_brief/domain/repositories/health_brief_repository.dart';
 
 // Use Cases
+import '../../features/auth/domain/usecases/delete_account.dart';
 import '../../features/auth/domain/usecases/get_current_user.dart';
 import '../../features/auth/domain/usecases/sign_in_with_email.dart';
 import '../../features/auth/domain/usecases/sign_in_with_google.dart';
@@ -58,10 +59,10 @@ void _initExternal(String geminiApiKey) {
   // Google Sign In
   sl.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn());
 
-  // Gemini
+  // Gemini (use a current model; gemini-1.5-flash is no longer available for v1beta)
   sl.registerLazySingleton<GenerativeModel>(
     () => GenerativeModel(
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       apiKey: geminiApiKey,
     ),
   );
@@ -110,6 +111,7 @@ void _initUseCases() {
   sl.registerLazySingleton(() => SignInWithGoogle(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
   sl.registerLazySingleton(() => GetCurrentUser(sl()));
+  sl.registerLazySingleton(() => DeleteAccount(sl()));
 
   // Health Brief
   sl.registerLazySingleton(() => AnalyzeDocument(sl()));
@@ -125,6 +127,7 @@ void _initBlocs() {
       signInWithGoogle: sl(),
       signOut: sl(),
       getCurrentUser: sl(),
+      deleteAccount: sl(),
     ),
   );
 

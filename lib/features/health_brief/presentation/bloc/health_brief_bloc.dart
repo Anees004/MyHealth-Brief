@@ -16,6 +16,9 @@ class HealthBriefBloc extends Bloc<HealthBriefEvent, HealthBriefState> {
   final GetHealthBriefs getHealthBriefs;
   final GetHealthBriefById getHealthBriefById;
 
+  /// Keeps the last analyzed brief so we can show it in the list when Firestore load fails (e.g. index).
+  HealthBriefEntity? _lastAnalyzedBrief;
+
   HealthBriefBloc({
     required this.analyzeDocument,
     required this.getHealthBriefs,
@@ -41,7 +44,10 @@ class HealthBriefBloc extends Bloc<HealthBriefEvent, HealthBriefState> {
 
     result.fold(
       (failure) => emit(HealthBriefError(failure.message)),
-      (brief) => emit(HealthBriefAnalyzed(brief)),
+      (brief) {
+        _lastAnalyzedBrief = brief;
+        emit(HealthBriefAnalyzed(brief));
+      },
     );
   }
 
@@ -57,8 +63,24 @@ class HealthBriefBloc extends Bloc<HealthBriefEvent, HealthBriefState> {
     ));
 
     result.fold(
-      (failure) => emit(HealthBriefError(failure.message)),
-      (briefs) => emit(HealthBriefsLoaded(briefs)),
+      (failure) {
+        // If we just analyzed a brief but list load failed (e.g. Firestore index),
+        // show the new brief so the user can still open it. Otherwise keep previous list if any.
+        if (_lastAnalyzedBrief != null) {
+          emit(HealthBriefsLoaded([_lastAnalyzedBrief!]));
+        } else {
+          final current = state;
+          if (current is HealthBriefsLoaded) {
+            emit(HealthBriefsLoaded(current.briefs));
+          } else {
+            emit(HealthBriefError(failure.message));
+          }
+        }
+      },
+      (briefs) {
+        _lastAnalyzedBrief = null;
+        emit(HealthBriefsLoaded(briefs));
+      },
     );
   }
 

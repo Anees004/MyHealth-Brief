@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -111,10 +112,47 @@ IMPORTANT RULES:
         message: e.message,
         code: 'api-error',
       );
+    } on SocketException catch (_) {
+      throw const GeminiException(
+        message: 'Unable to connect. Please check your internet connection and try again.',
+        code: 'network',
+      );
+    } on TimeoutException catch (_) {
+      throw const GeminiException(
+        message: 'The request took too long. Please check your connection and try again.',
+        code: 'timeout',
+      );
+    } on HandshakeException catch (_) {
+      throw const GeminiException(
+        message: 'Unable to connect securely. Please check your internet connection and try again.',
+        code: 'network',
+      );
+    } on OSError catch (e) {
+      // Covers "Failed host lookup", "nodename nor servname provided", etc.
+      if (e.message.contains('lookup') ||
+          e.message.contains('nodename') ||
+          e.message.contains('servname') ||
+          e.message.contains('Network is unreachable')) {
+        throw const GeminiException(
+          message: 'No internet connection. Please check your network and try again.',
+          code: 'network',
+        );
+      }
+      rethrow;
     } catch (e) {
       if (e is GeminiException) rethrow;
+      final msg = e.toString();
+      if (msg.contains('SocketException') ||
+          msg.contains('Failed host lookup') ||
+          msg.contains('ClientException') ||
+          msg.contains('nodename nor servname')) {
+        throw const GeminiException(
+          message: 'No internet connection. Please check your network and try again.',
+          code: 'network',
+        );
+      }
       throw GeminiException(
-        message: 'Failed to analyze document: $e',
+        message: 'Something went wrong while analyzing the document. Please try again.',
         code: 'unknown',
       );
     }

@@ -29,6 +29,13 @@ class ProfilePage extends StatelessWidget {
           if (state is AuthUnauthenticated) {
             context.go(AppRoutes.login);
           }
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message)),
+            );
+            // Re-check auth so profile stays visible (user is still logged in)
+            context.read<AuthBloc>().add(const AuthCheckRequested());
+          }
         },
         builder: (context, state) {
           if (state is! AuthAuthenticated) {
@@ -156,6 +163,20 @@ class ProfilePage extends StatelessWidget {
                     label: const Text(AppStrings.logout),
                   ),
                 ),
+                const SizedBox(height: 16),
+                // Delete account
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: TextButton.icon(
+                    onPressed: () => _showDeleteAccountDialog(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.errorRed,
+                    ),
+                    icon: const FaIcon(FontAwesomeIcons.trashCan, size: 18),
+                    label: const Text(AppStrings.deleteAccount),
+                  ),
+                ),
                 const SizedBox(height: 24),
                 // App Version
                 Text(
@@ -227,6 +248,32 @@ class ProfilePage extends StatelessWidget {
               foregroundColor: AppColors.errorRed,
             ),
             child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(AppStrings.deleteAccountConfirmTitle),
+        content: const Text(AppStrings.deleteAccountConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<AuthBloc>().add(const AuthDeleteAccountRequested());
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.errorRed,
+            ),
+            child: const Text(AppStrings.deleteAccountConfirmButton),
           ),
         ],
       ),

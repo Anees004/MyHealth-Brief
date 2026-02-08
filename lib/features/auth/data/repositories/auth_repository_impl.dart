@@ -99,6 +99,16 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, void>> deleteAccount() async {
+    try {
+      await remoteDataSource.deleteAccount();
+      return const Right(null);
+    } on AuthException catch (e) {
+      return Left(_mapAuthException(e));
+    }
+  }
+
   AuthFailure _mapAuthException(AuthException e) {
     switch (e.code) {
       case 'invalid-email':

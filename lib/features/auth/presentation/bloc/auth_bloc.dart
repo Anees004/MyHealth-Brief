@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/sign_in_with_email.dart';
 import '../../domain/usecases/sign_in_with_google.dart';
@@ -18,6 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInWithGoogle signInWithGoogle;
   final SignOut signOut;
   final GetCurrentUser getCurrentUser;
+  final DeleteAccount deleteAccount;
 
   AuthBloc({
     required this.signInWithEmail,
@@ -25,12 +27,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.signInWithGoogle,
     required this.signOut,
     required this.getCurrentUser,
+    required this.deleteAccount,
   }) : super(AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthSignInWithEmailRequested>(_onSignInWithEmail);
     on<AuthSignUpWithEmailRequested>(_onSignUpWithEmail);
     on<AuthSignInWithGoogleRequested>(_onSignInWithGoogle);
     on<AuthSignOutRequested>(_onSignOut);
+    on<AuthDeleteAccountRequested>(_onDeleteAccount);
   }
 
   Future<void> _onAuthCheckRequested(
@@ -113,6 +117,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     
     final result = await signOut();
+    
+    result.fold(
+      (failure) => emit(AuthError(failure.message)),
+      (_) => emit(AuthUnauthenticated()),
+    );
+  }
+
+  Future<void> _onDeleteAccount(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    
+    final result = await deleteAccount();
     
     result.fold(
       (failure) => emit(AuthError(failure.message)),

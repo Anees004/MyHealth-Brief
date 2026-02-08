@@ -66,7 +66,7 @@ class HealthBriefRemoteDataSourceImpl implements HealthBriefRemoteDataSource {
           .toList();
     } on FirebaseException catch (e) {
       throw ServerException(
-        message: e.message ?? 'Failed to get health briefs',
+        message: _userFriendlyFirestoreMessage(e),
         code: e.code,
       );
     }
@@ -111,6 +111,24 @@ class HealthBriefRemoteDataSourceImpl implements HealthBriefRemoteDataSource {
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => HealthBriefModel.fromFirestore(doc))
-            .toList());
+            .toList())
+        .handleError((error, stackTrace) {
+      if (error is FirebaseException) {
+        throw ServerException(
+          message: _userFriendlyFirestoreMessage(error),
+          code: error.code,
+        );
+      }
+      throw error;
+    });
+  }
+
+  /// Returns a short user-facing message for Firestore errors (e.g. missing index).
+  static String _userFriendlyFirestoreMessage(FirebaseException e) {
+    final msg = e.message ?? '';
+    if (msg.contains('requires an index') || msg.contains('create_composite')) {
+      return 'Database is being set up. Please deploy Firestore indexes (see firestore.indexes.json) or try again in a few minutes.';
+    }
+    return msg.isNotEmpty ? msg : 'Failed to load data.';
   }
 }

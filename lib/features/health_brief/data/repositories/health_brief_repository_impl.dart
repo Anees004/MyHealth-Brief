@@ -64,8 +64,26 @@ class HealthBriefRepositoryImpl implements HealthBriefRepository {
       return Left(StorageFailure(message: e.message, code: e.code));
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, code: e.code));
+    } on SocketException catch (_) {
+      return const Left(NetworkFailure(
+        message: 'No internet connection. Please check your network and try again.',
+        code: 'network',
+      ));
     } catch (e) {
-      return Left(ServerFailure(message: 'Failed to analyze document: $e'));
+      final msg = e.toString();
+      if (msg.contains('SocketException') ||
+          msg.contains('Failed host lookup') ||
+          msg.contains('ClientException') ||
+          msg.contains('nodename nor servname')) {
+        return const Left(NetworkFailure(
+          message: 'No internet connection. Please check your network and try again.',
+          code: 'network',
+        ));
+      }
+      return const Left(ServerFailure(
+        message: 'Something went wrong while analyzing. Please try again.',
+        code: 'unknown',
+      ));
     }
   }
 

@@ -14,7 +14,7 @@ class AppConstants {
   static const String documentsStoragePath = 'documents';
 
   // Gemini
-  static const String geminiModel = 'gemini-1.5-flash';
+  static const String geminiModel = 'gemini-2.5-flash';
 
   // Timeouts
   static const Duration apiTimeout = Duration(seconds: 30);
